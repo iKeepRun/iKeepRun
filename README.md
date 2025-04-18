@@ -13,13 +13,13 @@
 - 其他：Docker、Git
 
 ## 📊 GitHub 统计
-![GitHub Stats](./../assets/api.svg+xml)
+![GitHub Stats](https://github-readme-stats.vercel.app/api?username=iKeepRun&show_icons=true&theme=radical)
 
 ## 🔥 最近项目
 - [AI头像生成小程序](https://github.com/iKeepRun/ai-avatar) - 基于 AI 技术的头像生成工具
 
 ## 📈 编程语言使用情况
-![Top Langs](./../assets/1744961691290-2.svg+xml)
+![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=iKeepRun&layout=compact)
 
 ## 🤝 欢迎交流
 - 如果您对我的项目感兴趣，欢迎提出 Issue 或 Pull Request
