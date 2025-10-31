@@ -25,24 +25,30 @@ jobs:
 
       - name: Update README
         run: |
-          # 获取最新的5个仓库
+          # 获取最新的3个仓库
           REPOS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/users/${{ github.repository_owner }}/repos?per_page=5&type=owner&sort=updated)
+            https://api.github.com/users/${{ github.repository_owner }}/repos?per_page=3&type=owner&sort=updated)
 
           # 生成项目列表
-          PROJECTS=""
-          echo "$REPOS" | jq -r '.[] | "- [\(.name)](\(.html_url)) - \(.description // "No description")"' | while read -r line; do
-            PROJECTS="$PROJECTS\n$line"
-          done
+          PROJECTS=$(echo "$REPOS" | jq -r '.[] | "- [\(.name)](\(.html_url)) - \(.description // "No description")"')
 
-          # 更新 README 文件
-          sed -i '/## 🔥 Recent Projects/,/## 📈 Languages/{
-            /## 🔥 Recent Projects/!{
-              /## 📈 Languages/!d
-            }
-            /## 🔥 Recent Projects/a\
-            '"$PROJECTS"'
-          }' README.md
+          # 使用 Python 来更新 README
+          python3 << 'EOF'
+          import re
+
+          with open('README.md', 'r') as f:
+              content = f.read()
+
+          # 使用更精确的正则匹配
+          pattern = r'(## 🔥 Recent Projects\n)(.*?)(\n## 📈 Languages)'
+          new_content = r'\1' + '''${PROJECTS}''' + r'\3'
+
+          # 执行替换
+          content = re.sub(pattern, new_content, content, flags=re.DOTALL)
+          
+          with open('README.md', 'w') as f:
+              f.write(content)
+          EOF
 
       - name: Commit changes
         run: |
