@@ -1,0 +1,53 @@
+name: Update README with Latest Projects
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every day
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Update README
+        run: |
+          # 获取最新的5个仓库
+          REPOS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/users/${{ github.repository_owner }}/repos?per_page=5&type=owner&sort=updated)
+
+          # 生成项目列表
+          PROJECTS=""
+          echo "$REPOS" | jq -r '.[] | "- [\(.name)](\(.html_url)) - \(.description // "No description")"' | while read -r line; do
+            PROJECTS="$PROJECTS\n$line"
+          done
+
+          # 更新 README 文件
+          sed -i '/## 🔥 Recent Projects/,/## 📈 Languages/{
+            /## 🔥 Recent Projects/!{
+              /## 📈 Languages/!d
+            }
+            /## 🔥 Recent Projects/a\
+            '"$PROJECTS"'
+          }' README.md
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add README.md
+          git diff --staged --quiet || git commit -m "Update README with latest projects"
+          git push
